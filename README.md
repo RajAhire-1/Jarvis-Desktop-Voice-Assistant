@@ -72,7 +72,7 @@ terraform init
 Screenshot:
 
 ```
-images/terraform_init.png
+![](Images/terraform_init.png)
 ```
 
 ### Generate Execution Plan
