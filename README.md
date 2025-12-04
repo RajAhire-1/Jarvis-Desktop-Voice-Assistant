@@ -1,41 +1,31 @@
-# Deploying the Jarvis Desktop Voice Assistant on AWS EC2 using Terraform and Jenkins
+# **Deploying the Jarvis Desktop Voice Assistant on AWS EC2 using Terraform and Jenkins**
 
-This project demonstrates a complete DevOps workflow for deploying the **Jarvis Desktop Voice Assistant** application on an AWS EC2 instance using **Terraform for Infrastructure as Code (IaC)** and **Jenkins CI/CD** with **GitHub Webhooks** for automated deployments.
-
-It covers:
-
-* Forking and modifying the Jarvis Voice Assistant project
-* Provisioning AWS infrastructure using Terraform
-* Automating deployments through a Jenkins pipeline
-* Triggering deployments on GitHub push events
-* Running the application as a systemd-managed service on EC2
+This project demonstrates a complete DevOps workflow for deploying the **Jarvis Desktop Voice Assistant** application on an AWS EC2 instance using **Terraform** (Infrastructure as Code) and **Jenkins CI/CD** with GitHub Webhooks for automated deployments.
 
 ---
 
-## 1. Project Architecture
+## **1. Project Architecture**
 
 ```
-GitHub Repository  --->  Jenkins Pipeline  --->  AWS EC2 (Jarvis Application)
-         |                      |  
-   Webhook Trigger         SSH Deployment  
+GitHub Repo  --->  Jenkins Pipeline  --->  EC2 Instance (Jarvis App)
+       |                   |  
+Webhook Trigger      SSH Deploy via Key  
 ```
-
-This workflow ensures that every new commit is automatically deployed to the server.
 
 ---
 
-## 2. Prerequisites
+## **2. Prerequisites**
 
 * AWS Account
 * Terraform installed
 * Jenkins installed on EC2
 * SSH Key Pair
-* GitHub account with repository fork
-* Basic knowledge of CI/CD and AWS
+* GitHub repository fork
+* Basic AWS & CI/CD knowledge
 
 ---
 
-## 3. Step 1: Fork the Repository
+## **3. Step 1: Fork the Repository**
 
 Fork the original project:
 
@@ -45,109 +35,83 @@ https://github.com/kishanrajput23/Jarvis-Desktop-Voice-Assistant
 
 Apply at least one UI or text update and push it to your GitHub repository.
 
-**Screenshot example:**
+### Screenshot Example
 
-```
-![](images/git_clone.png)
-```
+![Git Clone](Images/git_clone.png)
 
 ---
 
-## 4. Step 2: Provision Infrastructure Using Terraform
+## **4. Step 2: Provision Infrastructure Using Terraform**
 
 Terraform provisions:
 
-* Ubuntu EC2 instance
-* Security Group
-* SSH Key Pair or imported key
-* User Data for application setup
-* systemd service for managing the Jarvis application
+* EC2 instance
+* Security group
+* Key pair
+* User data to configure Jarvis
+* systemd service for auto-start
 
 ### Initialize Terraform
 
 ```bash
 terraform init
 ```
+---
 
-Screenshot:
-
-```
-![](Images/terraform_init.png)
-```
-
-### Generate Execution Plan
+### Run Terraform Plan
 
 ```bash
 terraform plan
 ```
+---
 
-Screenshot:
-
-```
-images/terraform_plan.png
-```
-
-### Apply the Configuration
+### Apply Terraform
 
 ```bash
 terraform apply --auto-approve
 ```
 
-Screenshot:
-
-```
-images/terraform_auto_approve.png
-```
-
-### EC2 Dashboard
-
-```
-images/servers.png
-```
+![Terraform Apply](Images/terraform_auto_approve.png)
 
 ---
 
-## 5. Step 3: Verify Jarvis Service on EC2
+### EC2 Instances Dashboard
 
-Once Terraform completes, SSH into the instance and validate the service:
+![EC2 Instances](Images/servers.png)
+
+---
+
+## **5. Step 3: Verify Jarvis Service on EC2**
+
+SSH into the EC2 instance and verify service status:
 
 ```bash
 sudo systemctl status jarvis
 ```
 
-Screenshot:
-
-```
-images/activate_jarvis.png
-```
+![Jarvis Service](Images/activate_jarvis.png)
 
 ---
 
-## 6. Step 4: Configure Jenkins
+## **6. Step 4: Configure Jenkins**
 
 ### Add SSH Credentials
 
-Inside Jenkins:
+Navigate to:
+**Manage Jenkins → Credentials → System → Global → Add Credentials**
 
-1. Go to **Manage Jenkins → Credentials**
-2. Add a new credential:
+* Kind: SSH Username with Private Key
+* ID: `devops-key`
+* Username: `ubuntu`
+* Private Key: content of `check.pem`
 
-   * Type: SSH Username with Private Key
-   * ID: `devops-key`
-   * Username: `ubuntu`
-   * Private Key: paste the content of `check.pem`
-
-Screenshot:
-
-```
-images/jenkins_credentials.png
-```
+![Jenkins Credentials](Images/jenkins_credentials.png)
 
 ---
 
-## 7. Step 5: Create a Jenkins Pipeline
+## **7. Step 5: Create Jenkins Pipeline**
 
-Use the following `Jenkinsfile` for automated deployment:
+Use the following Jenkinsfile:
 
 ```groovy
 pipeline {
@@ -167,7 +131,7 @@ pipeline {
         stage("Checkout Code") {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/<your-username>/Jarvis-Desktop-Voice-Assistant.git'
+                    url: '(https://github.com/RajAhire-1/Jarvis-Desktop-Voice-Assistant.git)'
             }
         }
 
@@ -232,80 +196,53 @@ pipeline {
 
 ---
 
-## 8. Step 6: Configure GitHub Webhook
+## **8. Step 6: Configure GitHub Webhook**
 
-Navigate to:
+Go to:
+**GitHub → Repo → Settings → Webhooks → Add Webhook**
 
-**GitHub → Repository Settings → Webhooks → Add Webhook**
-
-Use the following settings:
-
-* **Payload URL:**
+* Payload URL:
 
   ```
   http://<JENKINS_PUBLIC_IP>:8080/github-webhook/
   ```
-* **Content type:** `application/json`
-* **Event:** Just the push event
+* Content type: `application/json`
+* Event: **Just the push event**
 
 ---
 
-## 9. Step 7: Automated Deployment Verification
+## **9. Step 7: Validate Automatic Deployment**
 
-Push any update to GitHub.
-Jenkins should automatically run the pipeline and deploy the changes.
+Push any new commit to GitHub.
+Jenkins should automatically trigger and deploy the update.
 
-Screenshot:
-
-```
-images/jenkins_deploy_success.png
-```
+![Jenkins Success](Images/jenins_deploy_success.png)
 
 ---
 
-## 10. Conclusion
+## **10. Conclusion**
 
-This project delivers:
+This project demonstrates:
 
-* Complete Infrastructure as Code deployment using Terraform
-* Automated CI/CD using Jenkins
-* Secure, key-based remote deployment
-* Continuous deployment through GitHub webhooks
-* Systemd-managed long-running Python application
+* Infrastructure automation using Terraform
+* CI/CD automation with Jenkins
+* Secure SSH deployment
+* Continuous deployment using GitHub Webhooks
+* Managing Python applications as systemd services
 
-This setup can serve as a scalable template for more complex DevOps architectures.
-
----
-
-## Future Enhancements
-
-* Integrate CloudWatch logs
-* Add reverse proxy with HTTPS
-* Introduce Docker and ECS/EKS
-* Implement Terraform remote backend (S3 + DynamoDB)
-* Add Slack or email notifications
+It provides a strong foundation for scalable DevOps workflows.
 
 ---
 
-## Screenshot Index
+## **Screenshot Index**
 
-| Stage                   | File                              |
-| ----------------------- | --------------------------------- |
-| Git Clone               | images/git_clone.png              |
-| Terraform Init          | images/terraform_init.png         |
-| Terraform Plan          | images/terraform_plan.png         |
-| Terraform Apply         | images/terraform_auto_approve.png |
-| AWS EC2 Dashboard       | images/servers.png                |
-| Jenkins Credentials     | images/jenkins_credentials.png    |
-| Jenkins Pipeline Output | images/jenkins_deploy_success.png |
-| Jarvis Service Status   | images/activate_jarvis.png        |
-
----
-
-If you want, I can also generate:
-
-* A clean architecture diagram (PNG/SVG)
-* A minimal or extended README version
-* A version with badges (Terraform, Jenkins, AWS, Build Passing)
-
-Just tell me.
+| Step                      | Image                             |
+| ------------------------- | --------------------------------- |
+| Git Clone                 | ![](Images/git_clone.png)              |
+| Terraform Init            | ![](Images/terraform_init.png)        |
+| Terraform Plan            | ![](Images/terraform_plan.png )        |
+| Terraform Apply           | ![](Images/terraform_auto_approve.png) |
+| EC2 Instances             | ![](Images/servers.png)                |
+| Jarvis Service            | ![](Images/activate_jarvis.png)        |
+| Jenkins Credentials       | ![](Images/jenkins_credentials.png)    |
+| Jenkins Deployment Output | ![](Images/jenins_deploy_success.png)  |
