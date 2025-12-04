@@ -3,6 +3,7 @@
 This project demonstrates a complete DevOps workflow for deploying the **Jarvis Desktop Voice Assistant** application on an AWS EC2 instance using **Terraform** (Infrastructure as Code) and **Jenkins CI/CD** with GitHub Webhooks for automated deployments.
 
 ---
+![](Images/over.png)
 
 ## **1. Project Architecture**
 
